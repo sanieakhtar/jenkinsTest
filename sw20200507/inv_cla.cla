@@ -1,0 +1,292 @@
+/**
+ * \addtogroup Core
+ *  @{
+ */
+
+/*****************************************************************************/
+/*!@file IPS_cla.cla @copyright
+ *      THESE FILES ARE COPYRIGHT OF IPT TECHNOLOGY GMBH. ALL RIGHTS RESERVED.
+ *\n    UNAUTHORISED COMMERCIAL USE, REPRODUCTION OR DISTRIBUTION OF THESE
+ *\n    FILES MAY LEAD TO PROSECUTION.
+ *\n
+ *\n    IPT Technology GmbH
+ *\n    Im Martelacker 14
+ *\n    79588 Efringen-Kirchen
+ *\n    Germany
+ *\n    Phone:   +49 7628 692 96-0
+ *\n    Fax:     +49 7628 692 96-99
+ *\n    info@ipt-technology.com
+ *\n    www.ipt-technology.com
+ *****************************************************************************/
+
+
+/*****************************************************************************/
+/*!@file            inv_cla.cla
+ * @brief           Control of the inverter.
+ *                  Calculations on various ADC samples to compute averages
+ *                  etc.
+ *//*
+ *  details    TASK 1
+ *
+ *****************************************************************************/
+
+
+
+//=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=
+//=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=
+//=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=
+
+
+
+
+//=============================================================================
+// Includes
+#include <stdint.h>
+#include <math.h>
+#include "inv_cnf.h"
+#include "inv_shared.h"
+#include "f28004x_device.h"
+
+
+//=============================================================================
+// MACROS, DECLARATIONS AND DEFINES - START
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+//
+// Globals
+//
+float ss_count;     // Soft start counter
+
+
+// Variables global to all CLA tasks only
+volatile float ek[3];                // error signals ek-0, ek-1, ek-2
+volatile float uk[3];
+volatile float delta;
+
+//volatile float b2 = 0.21809;
+//volatile float b1 = 0.39877;
+//volatile float b0 = 0.18068;
+//volatile float a1 = -0.0018746;
+//volatile float a0 = -0.99813;
+
+//volatile float b2;
+//volatile float b1;
+//volatile float b0;
+//volatile float a1;
+//volatile float a0;
+
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+// MACROS, DECLARATIONS AND DEFINES - END
+//=============================================================================
+
+
+
+//_____________________________________________________________________________
+//\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\\
+///\/\/\/\/\/|  CODE SECTION   -   START    |\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\
+//\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\\
+//"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+
+
+//=============================================================================
+// FUNCTION SECTION - START
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    //-------------------------
+    // Private Predeclaration
+    //*************************
+
+
+    //-------------------------
+    // Public Section
+    //*************************
+
+
+    //-------------------------
+    // Private Section
+    //*************************
+
+
+//------------------------------------------------------------------------------------------------
+/*!@brief   Task 1 - Phase derivation
+ *
+ *@ref      initCla1()
+ *
+ *@note     Reads the ADC value and updates phase accordingly.
+ *@note     A Type-2 PI Controller should be sufficient for keeping a stable output current magnitude.
+ *@note     In digital form the PI Controller has the following transfer function:
+ *@note     uk[0] = b2*ek[0] + b1*ek[1] + b0*ek[2] - a1*uk[1] - a0*uk[2],
+ *@note
+ *\n
+ */
+//interrupt void Cla1Task1 (void)
+__attribute__((interrupt)) void Cla1Task1 ( void )
+{
+
+#ifdef DEBUG
+    GpioDataRegs.GPADAT.bit.GPIO15 = 1;                                 // set High to indicate in CLA Task
+#endif
+    //ek[0] = (I_gyr_ref_cla - ((float)ADC_readResult(ADCB_BASE, ADC_SOC_NUMBER0)));
+    ek[0] = (I_gyr_ref_cla - ((float)AdcbResultRegs.ADCRESULT0));
+    uk[0] = b2*ek[0] + b1*ek[1] + b0*ek[2] - a1*uk[1] - a0*uk[2];
+
+
+    delta = uk[0];
+    __mdebugstop();
+    delta = __mminf32(delta, 4095.0);                                   // upper value limiting
+    delta = __mmaxf32(delta, 0.0F);                                     // lower value limiting
+
+    //
+    // delta = 0..1 -> limit phase to 0..180°
+    //
+    phase_setpoint = __mminf32((EPwm7Regs.TBPRD>>1) * delta/4095.0, (float)phase_limit);
+//    phase_setpoint = __mminf32((EPWM_getTimeBasePeriod(EPWM7_BASE)>>1) * delta/4095.0, (float)Phase_Limit);
+//    phase_setpoint = 45.0*EPWMCLK/PWM_Frequency/360;                  // set to a fixed value for testing
+
+    __mdebugstop();
+    // Apply new phase setpoint to EPWM7 wrt EPWM1 and thus EPWM2
+    EPwm7Regs.TBPHS.bit.TBPHS = (uint16_t)phase_setpoint;
+//    EPWM_setPhaseShift(EPWM7_BASE,(uint16_t)phase_setpoint);
+
+    // Update compare value which determines the sampling instant of the gyrator current
+//    EPwm3Regs.CMPA.bit.CMPA = 0;//EPwm3Regs.TBPRD - (EPwm7Regs.TBPHS.bit.TBPHS);
+//    EPwm3Regs.CMPA.bit.CMPA = (uint16_t) __mminf32((PWM_DB/2 + (EPwm3Regs.TBPRD + phase_setpoint)/2), EPwm3Regs.TBPRD - 1);
+    EPwm3Regs.CMPA.bit.CMPA = (uint16_t) __mminf32(EPwm3Regs.TBPRD + phase_setpoint/2, EPwm3Regs.TBPRD - 1);
+
+
+//    uk[1] = uk[0];
+    uk[2] = uk[1];
+    uk[1] = delta;
+    ek[2] = ek[1];
+    ek[1] = ek[0];
+
+    //
+    // Clear the ADC interrupt flag that triggers this task, so the next SOC can occur
+    //
+//    ADC_clearInterruptStatus(ADCB_BASE, ADC_INT_NUMBER1);
+    AdcbRegs.ADCINTFLGCLR.bit.ADCINT1 = 1U;
+    __mdebugstop();
+
+#ifdef DEBUG
+    GpioDataRegs.GPADAT.bit.GPIO15 = 0;                                 // clear to indicate end of CLA Task
+#endif
+
+}
+
+//------------------------------------------------------------------------------------------------
+/*!@brief   Task 2 - Initialization
+ *
+ *@ref      initCla1()
+ *
+ *@note
+ *
+ *\n
+ */
+__attribute__((interrupt))  void Cla1Task2 ( void )
+{
+    uk[0] = 0.0F;      // Reset controller
+    uk[1] = 0.0F;      // Reset controller
+    delta = 0.0F;
+
+    // Set phase=0 of EPWM7 wrt EPWM1 and thus EPWM2
+    //
+    phase_setpoint = 0.0F;
+    EPwm7Regs.TBPHS.bit.TBPHS = 0;
+//    EPWM_setPhaseShift(EPWM7_BASE,0U);
+}
+
+//------------------------------------------------------------------------------------------------
+/*!@brief   Task 3
+ *
+ *@ref
+ *
+ *@note
+ *\n
+ */
+__attribute__((interrupt))  void Cla1Task3 ( void )
+{
+
+}
+
+//------------------------------------------------------------------------------------------------
+/*!@brief   Task 4
+ *
+ *@ref
+ *
+ *@note
+ *\n
+ */
+__attribute__((interrupt))  void Cla1Task4 ( void )
+{
+
+}
+
+//------------------------------------------------------------------------------------------------
+/*!@brief   Task 5
+ *
+ *@ref
+ *
+ *@note
+ *\n
+ */
+__attribute__((interrupt))  void Cla1Task5 ( void )
+{
+
+}
+
+//------------------------------------------------------------------------------------------------
+/*!@brief   Task 6
+ *
+ *@ref
+ *
+ *@note
+ *\n
+ */
+__attribute__((interrupt))  void Cla1Task6 ( void )
+{
+
+}
+
+//------------------------------------------------------------------------------------------------
+/*!@brief   Task 7
+ *
+ *@ref
+ *
+ *@note
+ *\n
+ */
+__attribute__((interrupt))  void Cla1Task7 ( void )
+{
+
+}
+
+//------------------------------------------------------------------------------------------------
+/*!@brief   Task 8
+ *
+ *@ref
+ *
+ *@note
+ *\n
+ */
+__attribute__((interrupt))  void Cla1Task8 ( void )
+{
+
+}
+
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+// FUNCTION SECTION - END
+//=============================================================================
+
+
+/******************************************************************************
+ * THESE FILES ARE COPYRIGHT OF IPT TECHNOLOGY GMBH. ALL RIGHTS RESERVED.
+ * UNAUTHORISED COMMERCIAL USE, REPRODUCTION OR DISTRIBUTION OF THESE FILES
+ * MAY LEAD TO PROSECUTION.
+ *****************************************************************************/
+
+
+/** @}*/
+

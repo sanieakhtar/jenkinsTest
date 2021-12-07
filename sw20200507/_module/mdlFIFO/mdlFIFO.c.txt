@@ -1,0 +1,523 @@
+///** \addtogroup Modules
+// *  @{
+// */
+//
+///*****************************************************************************/
+///*!@file mdlFIFO.c @copyright
+// *      THESE FILES ARE COPYRIGHT OF IPT TECHNOLOGY GMBH. ALL RIGHTS RESERVED.
+// *\n    UNAUTHORISED COMMERCIAL USE, REPRODUCTION OR DISTRIBUTION OF THESE
+// *\n    FILES MAY LEAD TO PROSECUTION.
+// *\n
+// *\n    IPT Technology GmbH
+// *\n    Im Martelacker 14
+// *\n    79588 Efringen-Kirchen
+// *\n    Germany
+// *\n    Phone:   +49 7628 692 96-0
+// *\n    Fax:     +49 7628 692 96-99
+// *\n    info@ipt-technology.com
+// *\n    www.ipt-technology.com
+// *****************************************************************************/
+//
+//
+///*****************************************************************************/
+///*!@file            mdlFIFO.c
+// * @brief           FIFO manager.
+// *//*
+// *  details         The detailed description can be found
+// *                  in corresponding header.
+// *****************************************************************************/
+//
+//
+//
+////=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=
+////=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=
+////=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=
+//
+//
+//
+//
+////=============================================================================
+//// Includes
+//#include <stdint.h>
+//#include <stdbool.h>
+//#include <limits.h>
+//#include "globals.h"
+//#include "mdlFIFO.h"
+//
+//
+////=============================================================================
+//// MACROS, DECLARATIONS AND DEFINES - START
+////>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+//
+///*!@brief
+//* FIFO buffer descriptor.
+//*/
+//typedef struct mdlFIFO_cfg_buf
+//{
+//  uint16_t                   size; //!< buffer size
+//
+//}mdlFIFO_cfg_buf_t;
+//
+//
+///*!@brief
+//* Configuration data for all configured FIFO buffers.
+//*/
+//static mdlFIFO_cfg_buf_t cfg[e_mdlFIFO_cnf_buf__endOfList] = {
+//#define LOAD_MODULE_CONFIGURATION
+//    #include "./_config/mdlFIFO_cnf.h"
+//#undef  LOAD_MODULE_CONFIGURATION
+//};
+//
+///*!@brief
+// * Definition of FIFO buffer management variables.
+// *
+// */
+//typedef struct mdlFIFO_management
+//{
+//    struct {
+//        uint8_t    initialized  : 1;       //!< Flag to ensure only an initialized buffer can be used.
+//        uint8_t    full         : 1;       //!< Flags attempted buffer overrun, must be reset manually.
+//    }status;
+//
+//    struct {
+//        uint8_t*     pRead;                //!< Read pointer.
+//        uint8_t*     pWrite;               //!< Write pointer.
+//        uint8_t*     pStart;               //!< Pointer to start of FIFO.  //todo: create as ROM -> constant
+//        uint8_t*     pEnd;                 //!< Pointer to end of FIFO and start of following FIFO    //todo: create as ROM -> constant
+//    }control;
+//
+//#ifdef DEBUG
+//    struct {
+//        uint32_t     requestedBytes;       //!< No. of bytes requested to write (for debugging)
+//        uint32_t     readBytes;            //!< No. of bytes successfully read (for debugging)
+//    }count;
+//#endif
+//}mdlFIFO_management_t;
+//
+///*!@brief
+// * Data storage for all configured FIFO buffers.
+// *
+// * @details
+// * Pointers to start and end of each FIFO buffer are set up during FIFO initialization.
+// *
+// * @ref mdlFIFO_init()
+// */
+//static uint8_t mdlFIFO_data[mdlFIFO_BUFFER_LENGTH];
+//
+//
+///*!@brief
+// * List of variables for the management of the configured FIFO buffers.
+// *
+// */
+//static mdlFIFO_management_t mdlFIFO_buffer[e_mdlFIFO_cnf_buf__endOfList];
+//
+////<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//// MACROS, DECLARATIONS AND DEFINES - END
+////=============================================================================
+//
+//
+//
+////_____________________________________________________________________________
+////\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\\
+/////\/\/\/\/\/|  CODE SECTION   -   START    |\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\
+////\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\\
+////"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+//
+//
+//
+////=============================================================================
+//// FUNCTION SECTION - START
+////>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+//
+//    //-------------------------
+//    // Private Predeclaration
+//    //*************************
+//
+//
+//    //-------------------------
+//    // Public Section
+//    //*************************
+//
+//
+////------------------------------------------------------------------------------------------------
+///*!@brief   Initialize FIFO module.
+// *
+// *//*       [dir]       name                description         *//*!
+// *//*-----------------------------------------------------------*//*!
+// *
+// *@return   none
+// *\n
+// *@note     Must be called before any of the other module functions is called.
+// *\n
+// */
+//void mdlFIFO_init(void)
+//{
+//    uint8_t i;
+//    //------------------------------
+//
+//    //for each configured FIFO, initialize pointers to start and end
+//    for( i = 0; i < e_mdlFIFO_cnf_buf__endOfList; i++)
+//    {
+//        switch( i )
+//        {
+//            case 0:
+//                // set start of buffer to start of mdlFIFO_data
+//                mdlFIFO_buffer[i].control.pStart = mdlFIFO_data;
+//                // end = start + size
+//                mdlFIFO_buffer[i].control.pEnd   = mdlFIFO_buffer[i].control.pStart + cfg[i].size;
+//                break;
+//
+//            case 1:
+//            case 2:
+//            case 3:
+//            case 4:
+//                // set start of buffer to end of previous buffer
+//                mdlFIFO_buffer[i].control.pStart = mdlFIFO_buffer[i-1].control.pEnd;
+//                // end = start + size
+//                mdlFIFO_buffer[i].control.pEnd   = mdlFIFO_buffer[i].control.pStart + cfg[i].size;
+//                break;
+//
+//            default:
+//                break;
+//        }
+//
+//        // set pointer pWrite to start, then clear the FIFO
+//        mdlFIFO_buffer[i].control.pWrite = mdlFIFO_buffer[i].control.pStart;
+//        mdlFIFO_reset((mdlFIFO_cnf_buf_t) i);
+//
+//        // update status flag
+//        mdlFIFO_buffer[i].status.initialized = true;
+//
+//    }// end for
+//
+//    return;
+//}
+//
+//
+////------------------------------------------------------------------------------------------------
+///*!@brief   Write data to specific FIFO buffer.
+// *
+// *//*       [dir]       name                description         *//*!
+// *//*-----------------------------------------------------------*//*!
+// *@param    [in]        thisData            Reference to start of data bytes which should be written to FIFO.
+// *@param    [in]        numberOfBytes       Number of data bytes to be written.
+// *@param    [in]        thisBuffer          The target FIFO buffer.
+// *
+// *@return   success == true     := data bytes have been buffered
+// *\n                == false    := buffer not initialized or full
+// *\n
+// *@note
+// *\n
+// */
+//bool mdlFIFO_write( uint8_t* thisData, uint8_t numberOfBytes, mdlFIFO_cnf_buf_t thisBuffer)
+//{
+//    bool success = false;
+//
+//    uint8_t i = 0;
+//    uint8_t* pointingToNext  = NULL;
+//    uint8_t* pWrite          = NULL;
+//    uint8_t* pRead           = NULL;
+//
+//    //------------------------------
+//
+//#ifdef DEBUG
+//    // If no overflow, add number of bytes requested to write
+//    if((ULONG_MAX - numberOfBytes) >= mdlFIFO_buffer[thisBuffer].count.requestedBytes)
+//    {
+//        mdlFIFO_buffer[thisBuffer].count.requestedBytes+= numberOfBytes;
+//    }
+//#endif
+//
+//    // exit, if FIFO was not initialized or is full
+//    if(!mdlFIFO_buffer[thisBuffer].status.initialized || mdlFIFO_buffer[thisBuffer].status.full)
+//    {
+//        return success;
+//    }
+//
+//    EnterCritical();
+//
+//    //copy pointers
+//    pWrite  = mdlFIFO_buffer[thisBuffer].control.pWrite;
+//    pRead   = mdlFIFO_buffer[thisBuffer].control.pRead;
+//
+//    //increment write pointer and roll over to start, if at end
+//    pointingToNext = pWrite + 1;
+//    if(pointingToNext == mdlFIFO_buffer[thisBuffer].control.pEnd )
+//    {
+//        pointingToNext = mdlFIFO_buffer[thisBuffer].control.pStart;
+//    }
+//
+//    //write data bytes, until full
+//    for(i = 0; (i < numberOfBytes) && (pointingToNext != pRead); i++)
+//    {
+//        *pWrite = *thisData;    //write data byte
+//
+//        // advance pointers
+//        pWrite++;
+//        thisData++;
+//        pointingToNext++;
+//
+//        //check for FIFO end for write- and next-pointer
+//        if(pointingToNext == mdlFIFO_buffer[thisBuffer].control.pEnd )
+//        {
+//            pointingToNext = mdlFIFO_buffer[thisBuffer].control.pStart; //reset to FIFO start
+//        }
+//        else if(pWrite > pointingToNext )
+//        {
+//            pWrite = mdlFIFO_buffer[thisBuffer].control.pStart;         //reset to FIFO start
+//        }
+//    }
+//
+//    // all data bytes have been written
+//    if(i == numberOfBytes )
+//    {
+//        mdlFIFO_buffer[thisBuffer].control.pWrite   = pWrite;   //adjust write pointer
+//        success = true;                                         //true = all bytes have been written
+//    }
+//    // not all data bytes have been written
+//    // write pointer is not copied back, i.e. a subsequent read will not see the data written
+//    else
+//    {
+//        mdlFIFO_buffer[thisBuffer].status.full      = true;
+//    }
+//    ExitCritical();
+//
+//    return success;
+//}
+//
+//
+////------------------------------------------------------------------------------------------------
+///*!@brief   Read data from specific FIFO buffer.
+// *
+// *//*       [dir]       name                description         *//*!
+// *//*-----------------------------------------------------------*//*!
+// *@param    [in]        thisStorage         reference to storage of read bytes.
+// *@param    [in]        numberOfBytes       number of bytes to be read.
+// *@param    [in]        thisBuffer          target FIFO buffer.
+// *
+// *@return   success    == true     := all desired bytes have been read
+// *\n                   == false    := not all desired bytes could be read
+// *\n
+// *@note     If a "0" (zero) is handled as 'numberOfBytes' all unread bytes will be read.
+// *\n        Be sure you've reserved enough storage using this feature. There's no security check
+// *\n        done for you in this case.
+// */
+//bool mdlFIFO_read(uint8_t* thisStorage, uint8_t numberOfBytes, mdlFIFO_cnf_buf_t thisBuffer)
+//{
+//    bool success = false;
+//
+//    uint8_t i = 0;
+//    uint8_t* pRead           = NULL;
+//    uint8_t* pWrite          = NULL;
+//    //------------------------------
+//
+//    // exit, if FIFO was not initialized
+//    if(!mdlFIFO_buffer[thisBuffer].status.initialized)
+//    {
+//        return success;
+//    }
+//
+//    if(numberOfBytes == 0)     //if zero bytes should be read assume all unread bytes should be read
+//    {
+//        numberOfBytes = mdlFIFO_used( thisBuffer);
+//    }
+//
+//    pRead = mdlFIFO_buffer[thisBuffer].control.pRead;               //store current read pointer
+//
+//    EnterCritical();
+//    pWrite = mdlFIFO_buffer[thisBuffer].control.pWrite;             //store current write pointer (secured from interruption)
+//    ExitCritical();
+//
+//    for(i = 0; (i < numberOfBytes) && (pRead != pWrite); i++)
+//    {
+//        *thisStorage = *pRead;              //read data byte
+//        thisStorage++;                      //increment pointers
+//        pRead++;
+//
+//        if(pRead == mdlFIFO_buffer[thisBuffer].control.pEnd )      //check for FIFO end
+//        {
+//            pRead = mdlFIFO_buffer[thisBuffer].control.pStart;      //reset to FIFO start
+//        }
+//    }
+//
+//    if(i == numberOfBytes )
+//    {
+//        EnterCritical();
+//        mdlFIFO_buffer[thisBuffer].control.pRead    = pRead;        //update read pointer
+//        mdlFIFO_buffer[thisBuffer].status.full      = false;        //reset the overflow marker, because we've just freed space
+//        ExitCritical();
+//
+//#ifdef DEBUG
+//        // If no overflow, add number of read bytes
+//        if((ULONG_MAX - numberOfBytes) >= mdlFIFO_buffer[thisBuffer].count.readBytes)
+//        {
+//            mdlFIFO_buffer[thisBuffer].count.readBytes+= numberOfBytes;
+//        }
+//#endif
+//
+//        success = true;                                             //true = bytes have been read completely
+//    }
+//
+//    return success;
+//}
+//
+//
+////------------------------------------------------------------------------------------------------
+///*!@brief   Returns the fill level, i.e. the no. of bytes that can be read from the FIFO buffer.
+// *
+// *//*       [dir]       name                description         *//*!
+// *//*-----------------------------------------------------------*//*!
+// *@param    [in]        thisBuffer          Target FIFO buffer.
+// *
+// *@return   unreadBytes := number of bytes available for reading
+// *\n
+// *@note
+// *\n
+// */
+//uint8_t mdlFIFO_used(mdlFIFO_cnf_buf_t thisBuffer)
+//{
+//    uint16_t unreadBytes = 0;
+//
+//    uint8_t* pS;
+//    uint8_t* pE;
+//    uint8_t* pW;
+//    uint8_t* pR;
+//
+//    //------------------------------
+//
+//    // return zero, if FIFO was not initialized
+//    if(!mdlFIFO_buffer[thisBuffer].status.initialized)
+//    {
+//        return (uint8_t)unreadBytes;
+//    }
+//
+//    EnterCritical();
+//    // copy current pointers
+//    pS  = mdlFIFO_buffer[thisBuffer].control.pStart;
+//    pE  = mdlFIFO_buffer[thisBuffer].control.pEnd;
+//    pW  = mdlFIFO_buffer[thisBuffer].control.pWrite;
+//    pR  = mdlFIFO_buffer[thisBuffer].control.pRead;
+//
+//    if( pW > pR )
+//    {
+//        unreadBytes = pW - pR;
+//    }
+//    else if( pW < pR )
+//    {
+//        // calculate used bytes = head + tail = (pE - pR) + (pW - pS)
+//        unreadBytes = (pE - pR) + (pW - pS);
+//    }
+//    else
+//    {
+//        unreadBytes = 0;
+//    }
+//    ExitCritical();
+//
+//    return (uint8_t)unreadBytes;
+//}
+//
+//
+////------------------------------------------------------------------------------------------------
+///*!@brief   Returns the number of free bytes of specific buffer.
+// *
+// *//*       [dir]       name                description         *//*!
+// *//*-----------------------------------------------------------*//*!
+// *@param    [in]        thisBuffer          target FIFO buffer.
+// *
+// *@return   freeBytes := number of available bytes
+// *\n
+// *@note
+// *\n
+// */
+//uint8_t mdlFIFO_free(mdlFIFO_cnf_buf_t thisBuffer)
+//{
+//    uint8_t freeBytes = 0;
+//    //------------------------------
+//
+//    // return zero, if FIFO was not initialized OR FIFO full
+//    if(!mdlFIFO_buffer[thisBuffer].status.initialized || mdlFIFO_buffer[thisBuffer].status.full)
+//    {
+//        return 0;
+//    }
+//
+//    // calculate free bytes = size - used bytes - 1 = (end - start) - used bytes - 1
+//    freeBytes = mdlFIFO_used(thisBuffer);
+//    freeBytes = (mdlFIFO_buffer[thisBuffer].control.pEnd - mdlFIFO_buffer[thisBuffer].control.pStart) - freeBytes -1; // "-1" because the write-function will always refuse writing the last free byte
+//
+//    return freeBytes;
+//}
+//
+//
+////------------------------------------------------------------------------------------------------
+///*!@brief   Clear the FIFO buffer.
+// *
+// *//*       [dir]       name                description         *//*!
+// *//*-----------------------------------------------------------*//*!
+// *@param    [in]        thisBuffer          Target FIFO buffer.
+// *
+// *@return   none
+// *\n
+// *@note
+// *\n
+// */
+//void mdlFIFO_reset(mdlFIFO_cnf_buf_t thisBuffer)
+//{
+//    // clear flag
+//    mdlFIFO_buffer[thisBuffer].status.full = 0;
+//    // set read pointer equal to write pointer
+//    mdlFIFO_buffer[thisBuffer].control.pRead = mdlFIFO_buffer[thisBuffer].control.pWrite;
+//
+//#ifdef DEBUG
+//    // initialize counters
+//    mdlFIFO_buffer[thisBuffer].count.requestedBytes = 0;
+//    mdlFIFO_buffer[thisBuffer].count.readBytes = 0;
+//#endif
+//
+//    return;
+//}
+//
+//#ifdef DEBUG
+////------------------------------------------------------------------------------------------------
+///*!@brief   Get value of selected diagnostic counter of FIFO buffer.
+// *
+// *//*       [dir]       name                description         *//*!
+// *//*-----------------------------------------------------------*//*!
+// *@param    [in]        thisBuffer          Target FIFO buffer.
+// *@param    [in]        thisCounter         Selected counter.
+// *
+// *@return   Reference to byte counters of buffer thisBuffer
+// *\n
+// *@note
+// *\n
+// */
+//uint32_t mdlFIFO_getCounter(mdlFIFO_cnf_buf_t thisBuffer, mdlFIFO_ByteCounter_t thisCounter)
+//{
+//    if((thisBuffer >= e_mdlFIFO_cnf_buf__endOfList) || (thisCounter >= e_mdlFIFO_ByteCount_endOfList))
+//    {
+//        return 0;
+//    }
+//    else
+//    {
+//        return *(&mdlFIFO_buffer[thisBuffer].count.requestedBytes + thisCounter);
+//    }
+//}
+//#endif
+//
+//    //-------------------------
+//    // Private Section
+//    //*************************
+//
+//
+//
+////<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//// FUNCTION SECTION - END
+////=============================================================================
+//
+//
+///******************************************************************************
+// * THESE FILES ARE COPYRIGHT OF IPT TECHNOLOGY GMBH. ALL RIGHTS RESERVED.
+// * UNAUTHORISED COMMERCIAL USE, REPRODUCTION OR DISTRIBUTION OF THESE FILES
+// * MAY LEAD TO PROSECUTION.
+// *****************************************************************************/
+//
+///** @}*/
