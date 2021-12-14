@@ -183,10 +183,6 @@ sw20200507.hex \
 BIN_OUTPUTS__QUOTED += \
 "sw20200507.hex" \
 
-# Add empty variable to add flags over command line
-CDBG +=
-CFLAGS += $(CDBG)
-
 
 # All Target
 all: $(OBJS) $(CMD_SRCS) $(LIB_SRCS) $(GEN_CMDS)
