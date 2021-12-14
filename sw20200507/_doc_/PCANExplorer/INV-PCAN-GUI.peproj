@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PCANExplorerProject Version="5.0" Name="INV-PCAN-GUI">
+    <Connections AutoReset="0" IgnoreRTRLength="0" ProcessRTR="1">
+        <Connection Bus="2" Enabled="1" Protocol="0" SymbolsFileName="IPS_INV_CAN_Messages.sym" BitRate="284" Connection="ControlCAN@pcan_usb" Name="Connection2"/>
+    </Connections>
+    <MessageFilters>
+        <MessageFilter Name="InverterOps">
+            <MessageFilterItem Type="0" Bus="2" ID11From="387" ID11To="387"/>
+        </MessageFilter>
+    </MessageFilters>
+    <TransmitList>
+        <TransmitListItem Bus="2" CanId="531" Type="0" DLC="8" Data="" CycleTime="20" IsPaused="1" Creator="User"/>
+        <TransmitListItem Bus="2" CanId="531" Type="0" DLC="8" Data="01" CycleTime="20" IsPaused="1" Creator="User"/>
+        <TransmitListItem Bus="2" CanId="515" Type="0" DLC="8" Data="" CycleTime="20" IsPaused="1" Creator="User"/>
+        <TransmitListItem Bus="2" CanId="547" Type="0" DLC="8" Data="" CycleTime="20" IsPaused="1" Creator="User"/>
+        <TransmitListItem Bus="2" CanId="563" Type="0" DLC="8" Data="" CycleTime="20" IsPaused="1" Creator="User"/>
+    </TransmitList>
+    <Timeouts Enabled="0" LogfileEnabled="0" LogfilePath="$(PrjDir)\" CheckPermanently="0"/>
+    <Files>
+        <File RelativePath="IPS_INV_CAN_Messages.sym"/>
+        <File RelativePath="INV_Panel.ipf"/>
+    </Files>
+</PCANExplorerProject>

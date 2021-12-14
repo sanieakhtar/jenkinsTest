@@ -1,0 +1,129 @@
+FormatVersion=5.0 // Do not edit this line!
+Title="20kW Wireless Charging System Inverter"
+
+{ENUMS}
+// INV error codes
+enum e_Error(0="(0) No error", // No error
+  201="(201) 24V High", // supply voltage above limit
+  202="(202) 24V Low", // supply voltage below limit
+  203="(203) Bus Voltage High", // DC bus voltage above limit
+  204="(204) Bus Voltage Low", // DC bus voltage above limit
+  301="(301) Gyrator Voltage High", // gyrator voltage above limit
+  302="(302) Gyrator Current High", // gyrator current above limit
+  303="(303) Inverter Current High")// inverter current above limit
+// INV SIL error messages
+enum e_SIL_Error(0="NO FAULT", // No SIL issues
+  1="FAULT PRESENT")// SIL fault present
+// INV states
+enum e_INV_State(0="STATE_BOOT", // Start-up
+  1="STATE_IDLE",	// Idle
+  2="STATE_STANDBY", // Standby
+  3="STATE_OPERATE", // Output enabled
+  4="STATE_ERROR", // Error
+  255="STATE_ILLEGAL")// Not available
+
+{RECEIVE}
+
+[inv_Info]
+ID=383h	// IPS various information
+Color=000000h
+Mux=mux000_inv_SoftwareVersionInfo 0,8 0 	// INV software version info
+Var=inv_SoftwareID unsigned 8,32	// INV software ID
+Var=inv_SoftwareMajorVersion unsigned 40,8	// INV software major version
+Var=inv_SoftwareMinorVersion unsigned 48,8	// INV software minor version
+Var=inv_SoftwarePatchVersion unsigned 56,8	// INV software patch version
+
+[inv_Info]
+Color=800080h
+Mux=mux001_inv_Temperatures 0,8 1 	// IPS temperatures
+Var=inv_Temp_A unsigned 8,8 /u:°C /o:-40 /max:125 /d:21 /ln:"ips_Temperature_A"	// INV temperature A
+Var=inv_Temp_B unsigned 16,8 /u:°C /o:-40 /max:125 /d:22 /ln:"ips_Temperature_B"	// INV temperature B
+Var=inv_Temp_Gyr unsigned 24,8 /u:°C /o:-40 /max:125 /d:23 /ln:"ips_Temperature_Gyr"	// INV temperature of gyrator
+Var=inv_Temp_CPU unsigned 32,8 /u:°C /o:-40 /max:125 /p:1 /d:25 /ln:"ips_Temp_CPU"	// INV CPU on-chip temperature
+
+[inv_Info]
+Color=0000FFh
+Mux=mux002_inv_Errors 0,8 2 	// INV error code and error flags
+Var=inv_Error_Code unsigned 8,16 /e:e_Error	// INV error code
+Var=inv_24V_High bit 33,1	// INV supply voltage high error flag
+Var=inv_24V_Low bit 34,1	// INV supply voltage low error flag
+Var=inv_Bus_Voltage_High bit 35,1	// INV bus voltage high error flag
+Var=inv_Bus_Voltage_Low bit 36,1	// INV bus voltage low error flag
+Var=inv_Gyrator_Voltage_High bit 37,1	// INV gyrator voltage high error flag
+Var=inv_Gyrator_Current_High bit 38,1	// INV inverter current high error flag
+Var=inv_Inverter_Current_High bit 39,1	// INV gyrator current high error flag
+Var=inv_SIL_FAULT bit 40,1	// INV SIL fault error flag
+Var=inv_Overall_flag bit 32,1	// INV Overall (global) error flag
+
+[inv_Info]
+Color=FF0000h
+Mux=mux003_inv_SIL 0,8 3 
+Var=inv_SIL_FAULT bit 8,1 /e:e_SIL_Error
+
+[inv_Data]
+ID=183h	// IPS readings
+Color=008000h
+Mux=mux000_inv_Inverter 0,8 0 	// IPS fullbridge
+Var=inv_I_inverter unsigned 24,12 /u:A /f:0.1 /p:1 /ln:"ips_I_inv"	// INV fullbridge current
+Var=inv_phaseAngle unsigned 40,12 /u:° /f:0.1 /p:1 /ln:"ips_PhaseAngle"	// INV fullbridge phase angle
+
+[inv_Data]
+Color=008000h
+Mux=mux001_inv_Gyrator 0,8 1 	// INV gyrator readings (output)
+Var=inv_V_gyrator unsigned 8,14 /u:V /f:0.1 /max:1500 /p:1	// INV gyrator voltage
+Var=inv_I_gyrator unsigned 24,12 /u:A /f:0.1 /max:400 /p:1 /d:0	// INV gyrator current
+
+[inv_Data]
+Color=008000h
+Mux=mux002_inv_Various 0,8 2 	// INV supply readings
+Var=inv_V_24V unsigned 8,14 /u:V /f:0.1 /max:1500 /p:1	// INV 24V supply voltage
+Var=inv_V_bus unsigned 24,14 /u:V /f:0.1 /max:1500 /p:1	// INV bus supply voltage
+
+[inv_Status]
+ID=283h	// IPS state information
+Color=808000h
+Var=inv_errCode unsigned 24,16 /e:e_Error	// INV error code
+Var=inv_state unsigned 0,8 /e:e_INV_State /d:255	// INV State
+Var=inv_enableFullbridgePWM bit 8,1	// INV fullbridge enable flag
+Var=inv_enableFan bit 9,1	// INV fan enable flag
+Var=inv_enableCLAControl unsigned 10,1	// INV CLA control enable flag
+
+{SENDRECEIVE}
+
+[inv_outputControl]
+ID=213h
+CycleTime=20 -p
+Color=000080h
+Mux=mux000_inv_changeState 0,8 0 	// Inverter Clear Error Mux
+Var=changeState bit 8,1
+
+[inv_outputControl]
+CycleTime=20 -p
+Color=008000h
+Mux=mux001_inv_enableOutput 0,8 1 	// Inverter Output Control Mux
+Var=enableOutput bit 8,1
+
+[inv_Control]
+ID=203h	// Control messages to IPS
+CycleTime=20 -p
+Var=inv_enableOutput bit 0,1	// Enable IPS output
+Var=inv_clearError bit 1,1	// Clear IPS errors
+Var=inv_spareFlag bit 2,1	// ips_flag2
+Var=inv_spareBits unsigned 3,5	// spare, used for testing
+
+[inv_Updates]
+ID=223h	// Updated trip settings for IPS
+CycleTime=20 -p
+Var=i_gyr_trip unsigned 16,16 /u:A /ln:"Gyrator current trip limit"	// Enter new value of gyrator current trip
+Var=v_gyr_trip unsigned 0,16 /u:A /ln:"Gyrator voltage trip limit"	// Enter new value of gyrator voltage trip
+Var=i_inv_trip unsigned 32,16 /u:A /ln:"Inverter current trip limit"	// Enter new value of inverter current trip
+Var=i_gyr_ref unsigned 48,16 /u:A /f:0.1 /ln:"Gyrator Current Reference Value"	// Enter required gyrator reference value here
+
+[inv_claCoeffs]
+ID=233h
+CycleTime=20 -p
+Var=inv_F unsigned 32,16 /f:0.1
+Var=inv_K_a_h unsigned 48,16
+Var=inv_f_0_h unsigned 16,16
+Var=inv_f_s_h unsigned 0,16
+

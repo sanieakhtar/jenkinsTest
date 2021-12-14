@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExportImportMemento.1>
+<VarMeta IMemento.internal.id="I_gyr_ref_cla"/>
+<VarMeta IMemento.internal.id="I_gyr_ref"/>
+<VarMeta IMemento.internal.id="INV_Control"/>
+<VarMeta IMemento.internal.id="I_gyr"/>
+<VarMeta IMemento.internal.id="I_inv"/>
+<VarMeta IMemento.internal.id="V_gyr"/>
+<VarMeta IMemento.internal.id="AdcbResultRegs.ADCRESULT0"/>
+<VarMeta IMemento.internal.id="theIPS"/>
+<VarMeta IMemento.internal.id="EPwm7Regs.TBPHS.bit.TBPHS"/>
+<VarMeta IMemento.internal.id="phase_setpoint"/>
+<VarMeta IMemento.internal.id="delta"/>
+<VarMeta IMemento.internal.id="Refsetpoint"/>
+<VarMeta IMemento.internal.id="discreteCoeffs"/>
+<VarMeta IMemento.internal.id="HV_FB_LV"/>
+<VarMeta IMemento.internal.id="I_OUT_FB"/>
+<VarMeta IMemento.internal.id="I_CH1_FB"/>
+<VarMeta IMemento.internal.id="V_CH1_FB"/>
+<VarMeta IMemento.internal.id="I_CH2_FB"/>
+<VarMeta IMemento.internal.id="V_CH2_FB"/>
+<VarMeta IMemento.internal.id="I_CH3_FB"/>
+<VarMeta IMemento.internal.id="V_CH3_FB"/>
+<VarMeta IMemento.internal.id="V_24V"/>
+<VarMeta IMemento.internal.id="GpioDataRegs.GPADAT.bit.GPIO12"/>
+<VarMeta IMemento.internal.id="GpioDataRegs.GPADAT.bit.GPIO0"/>
+<VarMeta IMemento.internal.id="GpioDataRegs.GPADAT.bit.GPIO1"/>
+<VarMeta IMemento.internal.id="GpioDataRegs.GPADAT.bit.GPIO4"/>
+<VarMeta IMemento.internal.id="GpioDataRegs.GPADAT.bit.GPIO5"/>
+<VarMeta IMemento.internal.id="GpioDataRegs.GPADAT.bit.GPIO13"/>
+<VarMeta IMemento.internal.id="(HV_FB_LV&gt;=startup_output_volt)"/>
+<VarMeta IMemento.internal.id="startup_output_volt"/>
+<VarMeta IMemento.internal.id="operateTimerFire"/>
+<VarMeta IMemento.internal.id="&amp;timeout1"/>
+</ExportImportMemento.1>
