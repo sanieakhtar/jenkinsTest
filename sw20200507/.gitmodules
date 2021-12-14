@@ -1,8 +1,0 @@
-[submodule "f28004x_device_support"]
-    path = f28004x_device_support
-    url = https://git-codecommit.eu-central-1.amazonaws.com/v1/repos/f28004x-device-support
-    branch = v1.11.00.00
-[submodule "f28004x_driverlib"]
-    path = f28004x_driverlib
-    url = https://git-codecommit.eu-central-1.amazonaws.com/v1/repos/f28004x-driverlib
-    branch = v1.11.00.00
