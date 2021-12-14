@@ -16,7 +16,7 @@ pipeline {
                 sh 'python3 *.py'
                 sh 'echo " "'
                 sh 'echo "building CCS project..."'
-                sh 'make -C ./sw20200507/CPU1_FLASH/ -k -j 4 all -O -s
+                sh 'make -C ./sw20200507/CPU1_FLASH/ -k -j 4 all -O -s'
                 sh 'echo "finished building projects!"'
             }
         }
