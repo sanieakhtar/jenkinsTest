@@ -1,0 +1,15 @@
+_module/mdlSM/SMHandler.obj: ../_module/mdlSM/SMHandler.c
+_module/mdlSM/SMHandler.obj: /home/cicdserver/ti/ccs1040/ccs/tools/compiler/ti-cgt-c2000_20.2.5.LTS/include/stdbool.h
+_module/mdlSM/SMHandler.obj: /home/cicdserver/ti/ccs1040/ccs/tools/compiler/ti-cgt-c2000_20.2.5.LTS/include/_ti_config.h
+_module/mdlSM/SMHandler.obj: /home/cicdserver/ti/ccs1040/ccs/tools/compiler/ti-cgt-c2000_20.2.5.LTS/include/linkage.h
+_module/mdlSM/SMHandler.obj: ../_module/mdlSM/SMHandler.h
+_module/mdlSM/SMHandler.obj: /home/cicdserver/ti/ccs1040/ccs/tools/compiler/ti-cgt-c2000_20.2.5.LTS/include/stdint.h
+_module/mdlSM/SMHandler.obj: /home/cicdserver/ti/ccs1040/ccs/tools/compiler/ti-cgt-c2000_20.2.5.LTS/include/_stdint40.h
+_module/mdlSM/SMHandler.obj: /home/cicdserver/ti/ccs1040/ccs/tools/compiler/ti-cgt-c2000_20.2.5.LTS/include/sys/stdint.h
+_module/mdlSM/SMHandler.obj: /home/cicdserver/ti/ccs1040/ccs/tools/compiler/ti-cgt-c2000_20.2.5.LTS/include/sys/cdefs.h
+_module/mdlSM/SMHandler.obj: /home/cicdserver/ti/ccs1040/ccs/tools/compiler/ti-cgt-c2000_20.2.5.LTS/include/sys/_types.h
+_module/mdlSM/SMHandler.obj: /home/cicdserver/ti/ccs1040/ccs/tools/compiler/ti-cgt-c2000_20.2.5.LTS/include/machine/_types.h
+_module/mdlSM/SMHandler.obj: /home/cicdserver/ti/ccs1040/ccs/tools/compiler/ti-cgt-c2000_20.2.5.LTS/include/machine/_stdint.h
+_module/mdlSM/SMHandler.obj: /home/cicdserver/ti/ccs1040/ccs/tools/compiler/ti-cgt-c2000_20.2.5.LTS/include/sys/_stdint.h
+_module/mdlSM/SMHandler.obj: /home/cicdserver/ti/ccs1040/ccs/tools/compiler/ti-cgt-c2000_20.2.5.LTS/include/stdio.h
+_module/mdlSM/SMHandler.obj: /home/cicdserver/ti/ccs1040/ccs/tools/compiler/ti-cgt-c2000_20.2.5.LTS/include/stdarg.h

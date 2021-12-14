@@ -1,0 +1,12 @@
+_module/mdlNTC/mdlNTC.obj: ../_module/mdlNTC/mdlNTC.c
+_module/mdlNTC/mdlNTC.obj: ../_module/mdlNTC/mdlNTC.h
+_module/mdlNTC/mdlNTC.obj: /home/cicdserver/ti/ccs1040/ccs/tools/compiler/ti-cgt-c2000_20.2.5.LTS/include/stdint.h
+_module/mdlNTC/mdlNTC.obj: /home/cicdserver/ti/ccs1040/ccs/tools/compiler/ti-cgt-c2000_20.2.5.LTS/include/_ti_config.h
+_module/mdlNTC/mdlNTC.obj: /home/cicdserver/ti/ccs1040/ccs/tools/compiler/ti-cgt-c2000_20.2.5.LTS/include/linkage.h
+_module/mdlNTC/mdlNTC.obj: /home/cicdserver/ti/ccs1040/ccs/tools/compiler/ti-cgt-c2000_20.2.5.LTS/include/_stdint40.h
+_module/mdlNTC/mdlNTC.obj: /home/cicdserver/ti/ccs1040/ccs/tools/compiler/ti-cgt-c2000_20.2.5.LTS/include/sys/stdint.h
+_module/mdlNTC/mdlNTC.obj: /home/cicdserver/ti/ccs1040/ccs/tools/compiler/ti-cgt-c2000_20.2.5.LTS/include/sys/cdefs.h
+_module/mdlNTC/mdlNTC.obj: /home/cicdserver/ti/ccs1040/ccs/tools/compiler/ti-cgt-c2000_20.2.5.LTS/include/sys/_types.h
+_module/mdlNTC/mdlNTC.obj: /home/cicdserver/ti/ccs1040/ccs/tools/compiler/ti-cgt-c2000_20.2.5.LTS/include/machine/_types.h
+_module/mdlNTC/mdlNTC.obj: /home/cicdserver/ti/ccs1040/ccs/tools/compiler/ti-cgt-c2000_20.2.5.LTS/include/machine/_stdint.h
+_module/mdlNTC/mdlNTC.obj: /home/cicdserver/ti/ccs1040/ccs/tools/compiler/ti-cgt-c2000_20.2.5.LTS/include/sys/_stdint.h
